@@ -1,0 +1,31 @@
+{
+  "dependencies": {
+    "@prisma/client": "^7.10.0",
+    "@prisma/orm-postgres": "^8.0.0-rc.8",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "helmet": "^8.3.0",
+    "prisma": "^8.0.0-rc.10",
+    "zod": "^4.4.3"
+  },
+  "type": "module",
+  "scripts": {
+    "start": "bun run app.js",
+    "dev": "nodemon run app.js",
+    "build": "bun build app.js",
+    "postinstall": "prisma skills sync || exit 0",
+    "contract:emit": "prisma contract emit"
+  },
+  "name": "server",
+  "private": true,
+  "devDependencies": {
+    "@prisma/cli-engine": "0.2.3",
+    "@types/bun": "latest",
+    "@types/node": "^26.4.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

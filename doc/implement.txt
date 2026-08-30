@@ -1,0 +1,30 @@
+✓ Full-stack development 
+✓ REST APIs 
+✓ WebSockets 
+✓ PostgreSQL 
+✓ Database transactions 
+✓ Redis 
+✓ Kafka 
+✓ Event-driven architecture 
+✓ Microservices 
+✓ Distributed locks 
+✓ Concurrency 
+✓ Idempotency 
+✓ Rate limiting 
+✓ Circuit breakers 
+✓ Retry mechanisms 
+✓ Dead-letter queues
+✓ Docker 
+✓ Kubernetes 
+✓ AWS 
+✓ Terraform 
+✓ CI/CD 
+✓ Horizontal scaling 
+✓ Load balancing 
+✓ Prometheus 
+✓ Grafana 
+✓ Centralized logging 
+✓ Distributed tracing 
+✓ Security 
+✓ System design 
+✓ Load testing

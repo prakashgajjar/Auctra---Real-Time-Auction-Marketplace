@@ -1,0 +1,524 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+
+// ENUMS
+
+
+enum UserRole {
+  BUYER
+  SELLER
+  ADMIN
+  MODERATOR
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+  DELETED
+}
+
+enum AuctionStatus {
+  DRAFT
+  SCHEDULED
+  LIVE
+  ENDING
+  ENDED
+  CANCELLED
+  SOLD
+  UNSOLD
+}
+
+enum BidStatus {
+  VALID
+  OUTBID
+  REJECTED
+  CANCELLED
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  PAID
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  CREATED
+  PROCESSING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CARD
+  UPI
+  NET_BANKING
+  WALLET
+}
+
+enum ShipmentStatus {
+  PENDING
+  SHIPPED
+  IN_TRANSIT
+  DELIVERED
+  FAILED
+  RETURNED
+}
+
+enum ReviewStatus {
+  PUBLISHED
+  HIDDEN
+  FLAGGED
+}
+
+enum NotificationType {
+  BID_OUTBID
+  AUCTION_STARTED
+  AUCTION_ENDING
+  AUCTION_ENDED
+  AUCTION_WON
+  PAYMENT_PENDING
+  PAYMENT_SUCCESS
+  ORDER_SHIPPED
+  ORDER_DELIVERED
+  SYSTEM
+}
+
+
+
+// USER
+
+
+model User {
+  id        String     @id @default(uuid())
+  name      String
+  email     String     @unique
+  password  String
+  phone     String?    @unique
+  role      UserRole   @default(BUYER)
+  status    UserStatus @default(ACTIVE)
+  avatarUrl String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  products       Product[]
+  auctions       Auction[]      @relation("SellerAuctions")
+  bids           Bid[]
+  autoBids       AutoBid[]
+  watchlists     Watchlist[]
+  orders         Order[]        @relation("BuyerOrders")
+  soldOrders     Order[]        @relation("SellerOrders")
+  reviews        Review[]       @relation("BuyerReviews")
+  sellerReviews  Review[]       @relation("SellerReviews")
+  notifications  Notification[]
+  auditLogs      AuditLog[]
+  wonAuctions   Auction[]       @relation("AuctionWinner")
+
+  @@index([role])
+  @@index([status])
+  @@index([createdAt])
+}
+
+
+
+// PRODUCT
+
+
+model Product {
+  id             String   @id @default(uuid())
+
+  sellerId       String
+  seller         User     @relation(fields: [sellerId], references: [id])
+
+  name           String
+  description    String
+
+  brand          String?
+  condition      String?
+  tags           String[]
+
+  categoryId     String?
+  category       Category? @relation(fields: [categoryId], references: [id])
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  images         ProductImage[]
+  auctions       Auction[]
+  watchlists     Watchlist[]
+
+  @@index([sellerId])
+  @@index([categoryId])
+  @@index([createdAt])
+}
+
+
+
+// PRODUCT IMAGE
+
+
+model ProductImage {
+  id          String   @id @default(uuid())
+
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  url         String
+  key         String?
+  position    Int      @default(0)
+
+  createdAt   DateTime @default(now())
+
+  @@index([productId])
+}
+
+
+
+// CATEGORY
+
+
+model Category {
+  id          String   @id @default(uuid())
+
+  name        String   @unique
+  slug        String   @unique
+  description String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products    Product[]
+}
+
+
+
+// AUCTION
+
+
+model Auction {
+  id                String        @id @default(uuid())
+
+  productId         String        @unique
+  product           Product       @relation(fields: [productId], references: [id])
+
+  sellerId          String
+  seller            User          @relation("SellerAuctions", fields: [sellerId], references: [id])
+
+  startingPrice     Decimal       @db.Decimal(12, 2)
+  currentPrice      Decimal       @db.Decimal(12, 2)
+
+  reservePrice      Decimal?      @db.Decimal(12, 2)
+  buyNowPrice       Decimal?      @db.Decimal(12, 2)
+  minimumIncrement  Decimal       @db.Decimal(12, 2)
+
+  status            AuctionStatus @default(DRAFT)
+
+  startTime         DateTime
+  endTime           DateTime
+
+  winnerId          String?
+  winner            User?         @relation("AuctionWinner", fields: [winnerId], references: [id])
+
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  // Anti-sniping
+  extensionSeconds  Int           @default(0)
+
+  // Relations
+  bids              Bid[]
+  autoBids          AutoBid[]
+  watchlists        Watchlist[]
+  order             Order?
+
+  @@index([sellerId])
+  @@index([status, endTime])
+  @@index([startTime])
+}
+
+
+
+// BID
+
+
+model Bid {
+  id          String     @id @default(uuid())
+
+  auctionId   String
+  auction     Auction    @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+
+  userId      String
+  user        User       @relation(fields: [userId], references: [id])
+
+  amount      Decimal    @db.Decimal(12, 2)
+
+  status      BidStatus  @default(VALID)
+
+  createdAt   DateTime   @default(now())
+
+  // Server-side timestamp
+  receivedAt  DateTime   @default(now())
+
+  // Used for duplicate request protection
+  idempotencyKey String? @unique
+
+  @@index([auctionId, amount(sort: Desc)])
+  @@index([auctionId, createdAt(sort: Desc)])
+  @@index([userId])
+}
+
+
+
+// AUTOMATIC BIDDING
+
+
+model AutoBid {
+  id             String   @id @default(uuid())
+
+  auctionId      String
+  auction        Auction  @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+
+  maximumAmount  Decimal  @db.Decimal(12, 2)
+
+  isActive       Boolean  @default(true)
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([auctionId, userId])
+  @@index([auctionId, isActive])
+}
+
+
+
+// WATCHLIST
+
+
+model Watchlist {
+  id          String   @id @default(uuid())
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  auctionId   String?
+  auction     Auction? @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, productId])
+  @@index([userId])
+}
+
+
+
+// ORDER
+
+
+model Order {
+  id             String       @id @default(uuid())
+
+  orderNumber    String       @unique
+
+  buyerId        String
+  buyer          User         @relation("BuyerOrders", fields: [buyerId], references: [id])
+
+  sellerId       String
+  seller         User         @relation("SellerOrders", fields: [sellerId], references: [id])
+
+  auctionId      String       @unique
+  auction        Auction      @relation(fields: [auctionId], references: [id])
+
+  totalAmount    Decimal      @db.Decimal(12, 2)
+
+  status         OrderStatus  @default(PENDING_PAYMENT)
+
+  shippingName   String
+  shippingPhone  String
+  shippingAddress String
+  shippingCity   String
+  shippingState  String
+  shippingPostalCode String
+  shippingCountry String      @default("India")
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  payment        Payment?
+  shipment       Shipment?
+  review         Review?
+
+  @@index([buyerId])
+  @@index([sellerId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+
+
+// PAYMENT
+
+
+model Payment {
+  id                String         @id @default(uuid())
+
+  orderId           String         @unique
+  order             Order          @relation(fields: [orderId], references: [id])
+
+  amount            Decimal        @db.Decimal(12, 2)
+
+  status            PaymentStatus  @default(CREATED)
+  method            PaymentMethod?
+
+  provider          String?
+  providerPaymentId String?        @unique
+
+  idempotencyKey    String         @unique
+
+  failureReason     String?
+
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@index([status])
+}
+
+// SHIPMENT
+
+
+model Shipment {
+  id             String         @id @default(uuid())
+
+  orderId        String         @unique
+  order          Order          @relation(fields: [orderId], references: [id])
+
+  status         ShipmentStatus @default(PENDING)
+
+  trackingNumber String?
+  carrier        String?
+
+  shippedAt      DateTime?
+  deliveredAt    DateTime?
+
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@index([status])
+  @@index([trackingNumber])
+}
+
+// REVIEW
+
+model Review {
+  id          String       @id @default(uuid())
+
+  orderId     String       @unique
+  order       Order        @relation(fields: [orderId], references: [id])
+
+  buyerId     String
+  buyer       User         @relation("BuyerReviews", fields: [buyerId], references: [id])
+
+  sellerId    String
+  seller      User         @relation("SellerReviews", fields: [sellerId], references: [id])
+
+  rating      Int
+  comment     String?
+
+  status      ReviewStatus @default(PUBLISHED)
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([sellerId])
+  @@index([rating])
+}
+
+
+
+// NOTIFICATION
+
+
+model Notification {
+  id          String           @id @default(uuid())
+
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type        NotificationType
+  title       String
+  message     String
+
+  isRead      Boolean          @default(false)
+
+  createdAt   DateTime         @default(now())
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+}
+
+// AUDIT LOG
+
+
+model AuditLog {
+  id          String   @id @default(uuid())
+
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+
+  action      String
+  entity      String
+  entityId    String?
+
+  metadata    Json?
+
+  ipAddress   String?
+  userAgent   String?
+
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
+
+// TRANSACTIONAL OUTBOX
+
+model OutboxEvent {
+  id            String    @id @default(uuid())
+
+  eventType     String
+  aggregateType String
+  aggregateId   String
+
+  payload       Json
+
+  published     Boolean   @default(false)
+  publishedAt   DateTime?
+
+  retryCount    Int       @default(0)
+  lastError     String?
+
+  createdAt     DateTime  @default(now())
+
+  @@index([published, createdAt])
+  @@index([aggregateType, aggregateId])
+}

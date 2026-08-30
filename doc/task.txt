@@ -1,0 +1,533 @@
+Pahse 1 - Project Structure 
+Phase 2 - Authentication & Users
+
+Task 3 - Authentication
+
+Register
+Login
+Logout
+Password hashing
+JWT access token
+Refresh token
+Email verification
+Forgot/reset password
+
+Task 4 - User & Roles
+
+Buyer
+Seller
+Admin
+RBAC middleware
+User profile
+Account status
+Basic audit logging
+
+Phase 3 - Marketplace
+
+Task 5 - Product Management
+
+Seller creates product
+Edit/delete product
+Product images
+Product categories
+Product condition
+Product details
+
+Task 6 - AWS Image Storage
+
+Configure S3
+Generate pre-signed upload URLs
+Upload images directly to S3
+Store image metadata in PostgreSQL
+CloudFront for image delivery
+
+Task 7 - Product Discovery
+
+Product listing
+Pagination
+Search
+Filters
+Sorting
+Category pages
+
+
+Phase 4 - Auction Engine
+
+Task 8 - Create Auction
+
+Starting price
+Minimum bid increment
+Reserve price
+Buy Now price
+Start time
+End time
+Auction status
+DRAFT → SCHEDULED → LIVE → ENDED → SOLD/UNSOLD
+
+Task 9 - Basic Bidding
+
+Place bid API
+Validate bid
+Minimum increment
+Seller cannot bid
+User cannot bid after auction ends
+Store bid history
+Update current price
+
+Task 10 - Concurrent Bidding
+
+PostgreSQL transactions
+Row-level locking
+Prevent race conditions
+Idempotency keys
+Atomic bid updates
+Test simultaneous bids
+
+Task 11 - Real-Time Auction
+
+WebSocket/Socket.IO
+Live current price
+Live bid updates
+Bid history updates
+Connected-user tracking
+Auction countdown
+
+
+Phase 5 - Redis
+
+Task 12 - Redis Integration
+
+Auction cache
+Current bid cache
+User/session cache
+Rate-limit storage
+Distributed locks
+
+Task 13 - Rate Limiter
+
+API rate limiting
+Login rate limiting
+Bid rate limiting
+IP-based limits
+User-based limits
+Return HTTP 429
+
+
+Phase 6 - Advanced Auction Features
+
+Task 14 - Auto Bidding
+
+User sets maximum bid
+Automatic bid increments
+Competing auto-bidders
+Maximum-bid validation
+Winner calculation
+
+Task 15 - Auction Protection
+
+Anti-sniping
+Bid validation
+Suspicious bidding detection
+Seller/buyer restrictions
+Auction cancellation rules
+
+Task 16 - Auction Ending
+
+BullMQ workers
+Redis-backed jobs
+Distributed lock
+Final bid calculation
+Reserve-price check
+Winner selection
+Auction-ended event
+
+
+
+Phase 7 - Kafka
+
+Task 17 - Event Architecture
+Create Kafka topics:
+
+user.events
+product.events
+auction.events
+bid.events
+payment.events
+order.events
+notification.events
+
+Task 18 - Kafka Producers
+Publish:
+
+BID_PLACED
+BID_OUTBID
+AUCTION_STARTED
+AUCTION_ENDED
+AUCTION_WON
+PAYMENT_SUCCESS
+ORDER_CREATED
+
+Task 19 - Kafka Consumers
+Build consumers for:
+
+Notifications
+Analytics
+Search
+Orders
+Fraud detection
+
+Task 20 - Reliable Events
+
+Transactional Outbox
+Event IDs
+Retry mechanism
+Consumer idempotency
+Dead Letter Queue
+
+Phase 8 - Orders & Payments
+
+Task 21 - Order Service
+
+Create order after auction
+Winner information
+Order status
+Seller order management
+Buyer order management
+PENDING_PAYMENT
+→ PAID
+→ PROCESSING
+→ SHIPPED
+→ DELIVERED
+
+Task 22 - Payment Service
+
+Payment creation
+Payment gateway integration
+Webhooks
+Payment verification
+Idempotency
+Failed-payment handling
+Refunds
+Phase 9 - Notifications
+
+Task 23 - Notification Service
+Support:
+
+Email
+In-app notifications
+WebSocket notifications
+
+Events:
+
+You were outbid
+Auction started
+Auction ending soon
+You won
+Payment successful
+Order shipped
+Phase 10 - Search & Analytics
+
+Task 24 - Search Engine
+
+OpenSearch/Elasticsearch
+Product indexing
+Full-text search
+Filters
+Sorting
+Search suggestions
+
+Task 25 - Analytics
+Track:
+
+Total auctions
+Active auctions
+Total bids
+Bid success rate
+Revenue
+Seller performance
+Buyer activity
+Phase 11 - Security
+
+Task 26 - Security Hardening
+
+Input validation
+RBAC
+CORS
+Helmet/security headers
+SQL injection protection
+XSS protection
+Request validation
+Secure cookies/tokens
+Secrets management
+Audit logs
+
+Task 27 - Reliability
+Implement:
+
+Circuit breaker
+Retry
+Timeout
+Idempotency
+Graceful shutdown
+Health checks
+Readiness checks
+Liveness checks
+Phase 12 - Testing
+
+Task 28 - Automated Testing
+
+Unit Tests
+    ↓
+Integration Tests
+    ↓
+E2E Tests
+
+Test especially:
+
+Concurrent bidding
+Auction ending
+Auto bidding
+Payments
+Duplicate requests
+Kafka failures
+
+Task 29 - Load Testing
+Use k6.
+
+Test:
+
+1,000 users
+10,000 users
+100,000 bids
+
+Measure:
+
+RPS
+P95 latency
+P99 latency
+Error rate
+Bid throughput
+Phase 13 - Observability
+
+Task 30 - Logging
+
+Structured JSON logs
+Correlation ID
+Request ID
+Centralized logging
+OpenSearch/ELK
+
+Task 31 - Metrics
+
+Prometheus
+Application metrics
+Database metrics
+Redis metrics
+Kafka metrics
+Kubernetes metrics
+
+Task 32 - Grafana
+Create dashboards for:
+
+API
+Auctions
+Bids
+Kafka
+PostgreSQL
+Redis
+Kubernetes
+Infrastructure
+
+Task 33 - Distributed Tracing
+
+OpenTelemetry
+Trace IDs
+Service-to-service tracing
+Slow request investigation
+Phase 14 - Kubernetes
+
+Task 34 - Kubernetes Basics
+Create:
+
+Deployment
+Service
+ConfigMap
+Secret
+Ingress
+
+for each backend service.
+
+Task 35 - Kubernetes Scaling
+
+Horizontal Pod Autoscaler
+Resource limits
+Requests
+Readiness probes
+Liveness probes
+
+Task 36 - Helm
+Create Helm charts for:
+
+Auctra services
+Redis
+Kafka
+Monitoring
+Phase 15 - AWS
+
+Task 37 - AWS Infrastructure
+Create:
+
+VPC
+Public/Private Subnets
+IAM
+Security Groups
+ECR
+
+Task 38 - AWS Managed Services
+
+Use:
+
+EKS       → Kubernetes
+RDS       → PostgreSQL
+MSK       → Kafka
+ElastiCache → Redis
+S3        → Images
+CloudFront → CDN
+Route 53  → DNS
+WAF       → Security
+Secrets Manager → Secrets
+
+Task 39 - Deploy Auctra
+Deploy:
+
+Frontend
+API Gateway
+Microservices
+Kafka
+Redis
+PostgreSQL
+Workers
+WebSockets
+Phase 16 - CI/CD
+
+Task 40 - GitHub Actions
+
+Pipeline:
+
+Git Push
+   ↓
+Lint
+   ↓
+Unit Tests
+   ↓
+Integration Tests
+   ↓
+Build
+   ↓
+Docker Build
+   ↓
+Security Scan
+   ↓
+Push to ECR
+   ↓
+Deploy to EKS
+
+Task 41 - Deployment Strategy
+Implement:
+
+Rolling deployment
+Health checks
+Automatic rollback
+
+Then optionally:
+
+Canary deployment
+Blue/Green deployment
+Final Task - Production Readiness
+
+Task 42 - Production Testing & Documentation
+
+Verify:
+
+✓ Authentication
+✓ Product creation
+✓ Auction creation
+✓ Real-time bidding
+✓ Concurrent bidding
+✓ Auto bidding
+✓ Auction ending
+✓ Winner selection
+✓ Payment
+✓ Orders
+✓ Notifications
+✓ Kafka
+✓ Redis
+✓ Rate limiting
+✓ Kubernetes
+✓ AWS
+✓ CI/CD
+✓ Grafana
+✓ Logging
+✓ Tracing
+✓ Security
+✓ Load testing
+
+Then document:
+
+Architecture
+Database ERD
+API documentation
+Kafka events
+System design
+Failure scenarios
+Deployment
+Monitoring
+Security
+Scaling strategy
+The development order
+
+The most important sequence is:
+
+Foundation
+    ↓
+Auth
+    ↓
+Products
+    ↓
+Auction
+    ↓
+Bidding
+    ↓
+Concurrency
+    ↓
+WebSockets
+    ↓
+Redis
+    ↓
+Auto-Bidding
+    ↓
+Kafka
+    ↓
+Orders
+    ↓
+Payments
+    ↓
+Notifications
+    ↓
+Search
+    ↓
+Security
+    ↓
+Testing
+    ↓
+Observability
+    ↓
+Docker
+    ↓
+Kubernetes
+    ↓
+AWS
+    ↓
+CI/CD
+    ↓
+Production

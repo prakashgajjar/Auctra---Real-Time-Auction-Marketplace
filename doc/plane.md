@@ -978,7 +978,7 @@ Bid accepted if:
 server_received_at < auction.end_time
 ```
 
-The server—not the client—determines the timestamp.
+The server-not the client-determines the timestamp.
 
 This prevents users from manipulating browser clocks.
 
@@ -2179,7 +2179,7 @@ Do not build everything simultaneously.
 
 Build in phases.
 
-## Phase 1 — Foundation
+## Phase 1 - Foundation
 
 ```text
 1. Repository setup
@@ -2191,7 +2191,7 @@ Build in phases.
 7. User roles
 ```
 
-## Phase 2 — Marketplace
+## Phase 2 - Marketplace
 
 ```text
 8. Product management
@@ -2201,7 +2201,7 @@ Build in phases.
 12. Search/filter
 ```
 
-## Phase 3 — Auction Engine
+## Phase 3 - Auction Engine
 
 ```text
 13. Auction creation
@@ -2213,7 +2213,7 @@ Build in phases.
 19. Winner selection
 ```
 
-## Phase 4 — Real-Time System
+## Phase 4 - Real-Time System
 
 ```text
 20. WebSockets
@@ -2224,7 +2224,7 @@ Build in phases.
 25. Anti-sniping
 ```
 
-## Phase 5 — Event Architecture
+## Phase 5 - Event Architecture
 
 ```text
 26. Kafka
@@ -2235,7 +2235,7 @@ Build in phases.
 31. Dead Letter Queue
 ```
 
-## Phase 6 — Commerce
+## Phase 6 - Commerce
 
 ```text
 32. Orders
@@ -2246,7 +2246,7 @@ Build in phases.
 37. Reviews
 ```
 
-## Phase 7 — Production Engineering
+## Phase 7 - Production Engineering
 
 ```text
 38. Rate limiting
@@ -2257,7 +2257,7 @@ Build in phases.
 43. Health checks
 ```
 
-## Phase 8 — DevOps
+## Phase 8 - DevOps
 
 ```text
 44. Docker production images
@@ -2270,7 +2270,7 @@ Build in phases.
 51. S3
 ```
 
-## Phase 9 — Observability
+## Phase 9 - Observability
 
 ```text
 52. Prometheus
@@ -2281,7 +2281,7 @@ Build in phases.
 57. Alerts
 ```
 
-## Phase 10 — CI/CD
+## Phase 10 - CI/CD
 
 ```text
 58. GitHub Actions
