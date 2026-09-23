@@ -13,7 +13,7 @@ const redisOptions = {
   maxRetriesPerRequest: 3,
   retryStrategy(times) {
     if (times > 5) {
-      console.error('❌ Redis: max retry attempts reached');
+      console.error('Redis: max retry attempts reached');
       return null;
     }
     return Math.min(times * 200, 2000);
@@ -29,10 +29,10 @@ const redis = redisUrl
       ...redisOptions,
     });
 
-redis.on('connect', () => console.log('✅ Redis connected successfully'));
-redis.on('error', (err) => console.error('❌ Redis error:', err.message));
+redis.on('connect', () => console.log('Redis connected successfully'));
+redis.on('error', (err) => console.error('Redis error:', err.message));
 
-// ── Convenience helpers ─────────────────────
+// ── Convenience helpers 
 
 export async function getJson(key) {
   const data = await redis.get(key);

@@ -1,7 +1,6 @@
-// ──────────────────────────────────────────────────
 // Auctra Auth Service — Prisma Schema
 // Database: PostgreSQL
-// ──────────────────────────────────────────────────
+
 
 generator client {
   provider = "prisma-client-js"
@@ -12,9 +11,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ──────────────────────────────────────
 // Enums
-// ──────────────────────────────────────
 
 enum UserRole {
   BUYER
@@ -31,11 +28,7 @@ enum UserStatus {
   BANNED
   DELETED
 }
-
-// ──────────────────────────────────────
 // Users Table
-// ──────────────────────────────────────
-
 model User {
   id            String     @id @default(uuid()) @db.Uuid
   email         String     @unique @db.VarChar(255)
@@ -63,9 +56,7 @@ model User {
   @@map("users")
 }
 
-// ──────────────────────────────────────
 // Refresh Tokens Table
-// ──────────────────────────────────────
 
 model RefreshToken {
   id         String    @id @default(uuid()) @db.Uuid

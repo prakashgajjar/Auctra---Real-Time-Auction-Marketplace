@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import AuthCard from '../components/AuthCard';
 import ResetPasswordCard from '../components/ResetPasswordCard';
+import UserDashboard from '../components/user/UserDashboard';
 import {
   User,
   AuthTokens,
@@ -120,58 +121,13 @@ export default function Home() {
           </div>
         )}
 
-        {currentUser ? (
-          /* Logged In Dashboard Card */
-          <div className="w-full max-w-md bg-[#10131d]/90 backdrop-blur-2xl border border-white/10 rounded-2xl p-7 shadow-2xl shadow-black/80 relative overflow-hidden text-slate-100 animate-fadeIn">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-600 text-slate-950 font-bold text-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-amber-500/20">
-                {currentUser.firstName?.[0] || 'U'}
-              </div>
-              <h2 className="text-xl font-bold text-white">
-                {currentUser.firstName} {currentUser.lastName}
-              </h2>
-              <p className="text-xs text-slate-400 font-mono mt-0.5">
-                @{currentUser.username} • {currentUser.email}
-              </p>
-            </div>
-
-            <div className="space-y-2.5 bg-[#161a28] p-4 rounded-xl border border-white/5 text-xs">
-              <div className="flex justify-between py-1 border-b border-white/5">
-                <span className="text-slate-400">Account Role</span>
-                <span className="font-semibold text-amber-400 uppercase">
-                  {currentUser.role}
-                </span>
-              </div>
-              <div className="flex justify-between py-1 border-b border-white/5">
-                <span className="text-slate-400">Email Verification</span>
-                <span className="text-emerald-400 font-medium flex items-center gap-1">
-                  <span>✓</span> Verified
-                </span>
-              </div>
-              <div className="flex justify-between py-1 border-b border-white/5">
-                <span className="text-slate-400">Status</span>
-                <span className="text-white uppercase font-mono">
-                  {currentUser.status}
-                </span>
-              </div>
-              <div className="flex justify-between py-1">
-                <span className="text-slate-400">Session</span>
-                <span className="text-emerald-400 font-mono">
-                  Active (JWT)
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-6 flex flex-col gap-2">
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="w-full py-2.5 bg-gradient-to-r from-red-500/80 to-red-600/80 hover:from-red-500 hover:to-red-600 text-white font-semibold rounded-xl text-sm transition-all shadow-lg shadow-red-500/20 active:scale-[0.99]"
-              >
-                Sign Out Session
-              </button>
-            </div>
-          </div>
+        {currentUser && currentTokens?.accessToken ? (
+          <UserDashboard
+            initialUser={currentUser}
+            token={currentTokens.accessToken}
+            onLogout={handleLogout}
+            onNotify={(msg) => setNotification(msg)}
+          />
         ) : (
           /* Synchronized Auth & Reset Password Flow */
           <div className="w-full">
