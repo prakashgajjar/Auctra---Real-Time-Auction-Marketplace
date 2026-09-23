@@ -1,4 +1,4 @@
-// Auctra Auction & Product Marketplace Engine — Prisma Schema
+// Auctra Bidding Engine & Concurrency Engine — Prisma Schema
 // Database: PostgreSQL (Shared Auctra Database)
 
 generator client {
@@ -10,7 +10,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// User Enums (Consistent with Auth & User Services)
+// User Enums
 enum UserRole {
   BUYER
   SELLER
@@ -61,6 +61,11 @@ enum AuctionStatus {
   CANCELLED
 }
 
+enum BidType {
+  MANUAL
+  AUTO
+}
+
 // Users Table (Auth & User Services)
 model User {
   id            String     @id @default(uuid()) @db.Uuid
@@ -89,7 +94,6 @@ model User {
   watchlists     Watchlist[]
   bids           Bid[]
   autoBids       AutoBid[]
-
 
   @@index([email])
   @@index([username])
@@ -164,7 +168,7 @@ model SellerProfile {
   @@map("seller_profiles")
 }
 
-// Categories (Timepieces, Supercars, Fine Art, etc.)
+// Categories
 model Category {
   id          String    @id @default(uuid()) @db.Uuid
   name        String    @unique @db.VarChar(100)
@@ -178,7 +182,7 @@ model Category {
   @@map("categories")
 }
 
-// Products / Lots to be auctioned
+// Products
 model Product {
   id             String           @id @default(uuid()) @db.Uuid
   sellerId       String           @map("seller_id") @db.Uuid
@@ -243,7 +247,6 @@ model Auction {
   seller                 User          @relation("SellerAuctions", fields: [sellerId], references: [id], onDelete: Cascade)
   winner                 User?         @relation("WinnerAuctions", fields: [winnerId], references: [id])
   watchlists             Watchlist[]
-
   bids                   Bid[]
   autoBids               AutoBid[]
 
@@ -267,11 +270,6 @@ model Watchlist {
   @@unique([userId, auctionId])
   @@index([userId])
   @@map("watchlists")
-}
-
-enum BidType {
-  MANUAL
-  AUTO
 }
 
 // Bids Table
@@ -312,4 +310,3 @@ model AutoBid {
   @@index([userId])
   @@map("auto_bids")
 }
-
