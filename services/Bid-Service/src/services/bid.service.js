@@ -138,9 +138,14 @@ export async function placeBid({ userId, auctionId, amount, idempotencyKey = nul
         },
       });
 
+      const previousHighestBidderId = auction.current_highest_bidder_id;
+      const previousHighestBid = auction.current_highest_bid;
+
       return {
         bid,
         auction: updatedAuction,
+        previousHighestBidderId,
+        previousHighestBid,
       };
     });
   } finally {
@@ -163,6 +168,8 @@ export async function placeBid({ userId, auctionId, amount, idempotencyKey = nul
     bidderId: userId,
     bidderUsername: placedBidResult.bid.bidder.username,
     amount: Number(placedBidResult.bid.amount),
+    previousHighestBidderId: placedBidResult.previousHighestBidderId,
+    previousHighestBid: placedBidResult.previousHighestBid ? Number(placedBidResult.previousHighestBid) : null,
     bidType: 'MANUAL',
     bidCount: placedBidResult.auction.bidCount,
     endTime: placedBidResult.auction.endTime.toISOString(),

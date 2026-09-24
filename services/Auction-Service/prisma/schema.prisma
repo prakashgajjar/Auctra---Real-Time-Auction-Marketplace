@@ -89,6 +89,7 @@ model User {
   watchlists     Watchlist[]
   bids           Bid[]
   autoBids       AutoBid[]
+  notifications  Notification[]
 
 
   @@index([email])
@@ -274,6 +275,14 @@ enum BidType {
   AUTO
 }
 
+enum NotificationType {
+  AUCTION_WON
+  AUCTION_OUTBID
+  AUCTION_ENDED_PARTICIPANT
+  AUCTION_BID_PLACED
+  SYSTEM
+}
+
 // Bids Table
 model Bid {
   id             String    @id @default(uuid()) @db.Uuid
@@ -311,5 +320,24 @@ model AutoBid {
   @@index([auctionId, isActive])
   @@index([userId])
   @@map("auto_bids")
+}
+
+// Notifications Table
+model Notification {
+  id        String           @id @default(uuid()) @db.Uuid
+  userId    String           @map("user_id") @db.Uuid
+  type      NotificationType @default(SYSTEM)
+  title     String           @db.VarChar(255)
+  message   String           @db.Text
+  data      Json             @default("{}")
+  isRead    Boolean          @default(false) @map("is_read")
+  readAt    DateTime?        @map("read_at")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+  @@map("notifications")
 }
 

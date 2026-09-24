@@ -210,7 +210,7 @@ Failed-payment handling
 Refunds
 Phase 9 - Notifications
 
-Task 23 - Notification Service
+✓ Task 23 - Notification Service (Completed)
 Support:
 
 Email

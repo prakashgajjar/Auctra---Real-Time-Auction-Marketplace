@@ -126,5 +126,20 @@ export async function releaseLock(key, lockValue) {
   }
 }
 
+/**
+ * Publish Real-time Auction Lifecycle Event via Redis Pub/Sub
+ */
+export async function publishAuctionEvent(eventType, eventData) {
+  try {
+    const payload = JSON.stringify({ type: eventType, ...eventData, timestamp: new Date().toISOString() });
+    await Promise.all([
+      redis.publish('auction:events', payload),
+      redis.publish('auction:lifecycle', payload),
+    ]);
+  } catch (err) {
+    console.warn(`[Redis Pub/Sub Warning] Failed to publish ${eventType} for auction:`, err.message);
+  }
+}
+
 export default redis;
 

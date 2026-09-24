@@ -1,0 +1,191 @@
+// Auctra Notification Engine — Prisma Schema
+// Database: PostgreSQL (Shared Auctra Database)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Enums
+enum UserRole {
+  BUYER
+  SELLER
+  ADMIN
+  MODERATOR
+}
+
+enum UserStatus {
+  PENDING_VERIFICATION
+  ACTIVE
+  SUSPENDED
+  DEACTIVATED
+  BANNED
+  DELETED
+}
+
+enum ProductCondition {
+  NEW
+  LIKE_NEW
+  EXCELLENT
+  GOOD
+  FAIR
+}
+
+enum ProductStatus {
+  DRAFT
+  AVAILABLE
+  IN_AUCTION
+  SOLD
+  ARCHIVED
+}
+
+enum AuctionStatus {
+  DRAFT
+  SCHEDULED
+  LIVE
+  EXTENDED
+  ENDED
+  SOLD
+  UNSOLD
+  CANCELLED
+}
+
+// Notification Types
+enum NotificationType {
+  AUCTION_WON
+  AUCTION_OUTBID
+  AUCTION_ENDED_PARTICIPANT
+  AUCTION_BID_PLACED
+  SYSTEM
+  AUCTION_STARTED
+  AUCTION_ENDING_SOON
+  PAYMENT_SUCCESSFUL
+  ORDER_SHIPPED
+  PAYMENT_PENDING
+  PAYMENT_REFUNDED
+}
+
+// Users Table (Auth & User Services)
+model User {
+  id            String         @id @default(uuid()) @db.Uuid
+  email         String         @unique @db.VarChar(255)
+  username      String         @unique @db.VarChar(50)
+  passwordHash  String         @map("password_hash") @db.VarChar(255)
+  firstName     String         @map("first_name") @db.VarChar(100)
+  lastName      String         @map("last_name") @db.VarChar(100)
+  phone         String?        @unique @db.VarChar(20)
+  avatarUrl     String?        @map("avatar_url") @db.VarChar(500)
+  bio           String?        @db.Text
+  role          UserRole       @default(BUYER)
+  status        UserStatus     @default(PENDING_VERIFICATION)
+  emailVerified Boolean        @default(false) @map("email_verified")
+  phoneVerified Boolean        @default(false) @map("phone_verified")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  notifications Notification[]
+  sellerAuctions Auction[]      @relation("SellerAuctions")
+  wonAuctions    Auction[]      @relation("WinnerAuctions")
+  products       Product[]
+  watchlists     Watchlist[]
+
+  @@index([email])
+  @@index([username])
+  @@index([role])
+  @@index([status])
+  @@map("users")
+}
+
+// Products
+model Product {
+  id             String           @id @default(uuid()) @db.Uuid
+  sellerId       String           @map("seller_id") @db.Uuid
+  categoryId     String           @map("category_id") @db.Uuid
+  title          String           @db.VarChar(255)
+  description    String           @db.Text
+  condition      ProductCondition @default(EXCELLENT)
+  specifications Json             @default("{}")
+  status         ProductStatus    @default(DRAFT)
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
+
+  seller         User             @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  auction        Auction?
+
+  @@index([sellerId])
+  @@index([status])
+  @@map("products")
+}
+
+// Auctions
+model Auction {
+  id                     String        @id @default(uuid()) @db.Uuid
+  productId              String        @unique @map("product_id") @db.Uuid
+  sellerId               String        @map("seller_id") @db.Uuid
+  startingPrice          Decimal       @map("starting_price") @db.Decimal(12, 2)
+  reservePrice           Decimal?      @map("reserve_price") @db.Decimal(12, 2)
+  minIncrement           Decimal       @default(100.00) @map("min_increment") @db.Decimal(12, 2)
+  buyNowPrice            Decimal?      @map("buy_now_price") @db.Decimal(12, 2)
+  currentHighestBid      Decimal?      @map("current_highest_bid") @db.Decimal(12, 2)
+  currentHighestBidderId String?       @map("current_highest_bidder_id") @db.Uuid
+  bidCount               Int           @default(0) @map("bid_count")
+  startTime              DateTime      @map("start_time")
+  endTime                DateTime      @map("end_time")
+  status                 AuctionStatus @default(DRAFT)
+  antiSnipingTriggered   Boolean       @default(false) @map("anti_sniping_triggered")
+  winningBid             Decimal?      @map("winning_bid") @db.Decimal(12, 2)
+  winnerId               String?       @map("winner_id") @db.Uuid
+  endedAt                DateTime?     @map("ended_at")
+  createdAt              DateTime      @default(now()) @map("created_at")
+  updatedAt              DateTime      @updatedAt @map("updated_at")
+
+  product                Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  seller                 User          @relation("SellerAuctions", fields: [sellerId], references: [id], onDelete: Cascade)
+  winner                 User?         @relation("WinnerAuctions", fields: [winnerId], references: [id])
+  watchlists             Watchlist[]
+
+  @@index([sellerId])
+  @@index([status])
+  @@index([startTime])
+  @@index([endTime])
+  @@map("auctions")
+}
+
+// Buyer Watchlists
+model Watchlist {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  auctionId String   @map("auction_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  auction   Auction  @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, auctionId])
+  @@index([userId])
+  @@map("watchlists")
+}
+
+// Notifications Table
+model Notification {
+  id        String           @id @default(uuid()) @db.Uuid
+  userId    String           @map("user_id") @db.Uuid
+  type      NotificationType @default(SYSTEM)
+  title     String           @db.VarChar(255)
+  message   String           @db.Text
+  data      Json             @default("{}")
+  isRead    Boolean          @default(false) @map("is_read")
+  readAt    DateTime?        @map("read_at")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+  @@index([type])
+  @@map("notifications")
+}

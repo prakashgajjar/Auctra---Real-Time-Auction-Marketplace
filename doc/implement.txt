@@ -1,16 +1,16 @@
-✓ Full-stack development 
-✓ REST APIs 
+✓ Full-stack development done
+✓ REST APIs done
 ✓ WebSockets 
-✓ PostgreSQL 
+✓ PostgreSQL done
 ✓ Database transactions 
-✓ Redis 
+✓ Redis done
 ✓ Kafka 
 ✓ Event-driven architecture 
-✓ Microservices 
+✓ Microservices done
 ✓ Distributed locks 
 ✓ Concurrency 
 ✓ Idempotency 
-✓ Rate limiting 
+✓ Rate limiting done
 ✓ Circuit breakers 
 ✓ Retry mechanisms 
 ✓ Dead-letter queues
